@@ -345,7 +345,6 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 <div align="center">
 
-**Built with ❤️ by [Bharan Boddu](https://github.com/bharanboddu)**
 
 ⭐ Star this repo if you find it useful!
 
