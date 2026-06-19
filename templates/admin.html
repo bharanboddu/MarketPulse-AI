@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Metrics cards for Admin -->
+<div class="metrics-row" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="metric-card glass-panel">
+        <span class="metric-card-label">Total Registered Users</span>
+        <span class="metric-card-value">{{ total_users }}</span>
+        <div class="metric-card-footer">
+            <span class="text-muted">Total user accounts registered</span>
+        </div>
+    </div>
+    <div class="metric-card glass-panel">
+        <span class="metric-card-label">Active Monitored Asset</span>
+        <span class="metric-card-value">{{ active_symbol }}</span>
+        <div class="metric-card-footer">
+            <span class="text-muted">Current session active ticker focus</span>
+        </div>
+    </div>
+    <div class="metric-card glass-panel">
+        <span class="metric-card-label">System Time (Local)</span>
+        <span class="metric-card-value" style="font-size:18px; margin: 12px 0;">{{ current_time }}</span>
+        <div class="metric-card-footer">
+            <span class="text-muted">Current local server timestamp</span>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Live Activity Log Table -->
+    <div class="col-12 glass-panel">
+        <div class="panel-header">
+            <h2 class="panel-title"><i class="fa-solid fa-list-check"></i> Live User Activity logs</h2>
+            <div class="panel-controls">
+                <span class="badge sentiment-pos" style="font-size: 10px;">Security Auditing</span>
+            </div>
+        </div>
+        <div class="panel-body" style="padding:0; max-height: 500px; overflow-y: auto;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Activity / Action Triggered</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if logs %}
+                        {% for log in logs %}
+                            <tr>
+                                <td style="color: var(--text-secondary); font-size:12.5px;">
+                                    {{ log.timestamp.strftime('%b %d, %Y %H:%M:%S') }}
+                                </td>
+                                <td>
+                                    <strong>{{ log.username }}</strong>
+                                </td>
+                                <td>
+                                    <span style="font-family:'Outfit',sans-serif; font-size:13.5px;">{{ log.action }}</span>
+                                </td>
+                                <td style="color: var(--text-muted); font-size:12.5px;">
+                                    {{ log.ip_address }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="empty-alerts">No activity logs recorded yet.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

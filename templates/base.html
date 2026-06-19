@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPulse AI - Intelligent Terminal</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="MarketPulse AI Logo" class="brand-logo-img" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--accent-blue-glow); box-shadow: 0 0 8px var(--accent-blue-glow);">
+                <div class="brand-text">
+                    <h1>MarketPulse <span class="accent-text">AI</span></h1>
+                    <span class="brand-subtitle">Financial Intelligence</span>
+                </div>
+            </div>
+
+            <!-- Active Asset Quick Status -->
+            <div class="active-asset-card glass-panel">
+                <div class="asset-card-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div id="sidebar-logo-container" style="width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:50%; overflow:hidden; border:1px solid var(--panel-border);">
+                            <!-- Injected by JS -->
+                        </div>
+                        <span class="active-symbol" id="sidebar-symbol">{{ active_symbol }}</span>
+                    </div>
+                    <span class="asset-badge" id="sidebar-asset-class">...</span>
+                </div>
+                <div class="asset-card-body">
+                    <h3 class="active-name" id="sidebar-name">Loading...</h3>
+                    <div class="price-row">
+                        <span class="active-price" id="sidebar-price">$0.00</span>
+                        <span class="active-change" id="sidebar-change">+0.00%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="nav-menu">
+                <a href="{{ url_for('route_overview') }}" class="nav-link {% if active_page == 'overview' %}active{% endif %}">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard Overview
+                </a>
+                <a href="{{ url_for('route_todays_trades') }}" class="nav-link {% if active_page == 'todays_trades' %}active{% endif %}" style="border-left-color: var(--accent-blue); background: rgba(59, 130, 246, 0.04);">
+                    <i class="fa-solid fa-list-check" style="color: var(--accent-blue);"></i> Today's Trades
+                </a>
+                <a href="{{ url_for('route_news') }}" class="nav-link {% if active_page == 'news' %}active{% endif %}">
+                    <i class="fa-solid fa-newspaper"></i> News Intelligence
+                </a>
+                <a href="{{ url_for('route_investors') }}" class="nav-link {% if active_page == 'investors' %}active{% endif %}">
+                    <i class="fa-solid fa-users-viewfinder"></i> Investor Analysis
+                </a>
+                <a href="{{ url_for('route_sentiment') }}" class="nav-link {% if active_page == 'sentiment' %}active{% endif %}">
+                    <i class="fa-solid fa-face-smile"></i> Sentiment Dashboard
+                </a>
+                <a href="{{ url_for('route_network') }}" class="nav-link {% if active_page == 'network' %}active{% endif %}">
+                    <i class="fa-solid fa-diagram-project"></i> Market Network
+                </a>
+                <a href="{{ url_for('route_predictions') }}" class="nav-link {% if active_page == 'predictions' %}active{% endif %}">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Prediction Engine
+                </a>
+                <a href="{{ url_for('route_portfolio') }}" class="nav-link {% if active_page == 'portfolio' %}active{% endif %}">
+                    <i class="fa-solid fa-wallet"></i> Portfolio Analyzer
+                </a>
+                <a href="{{ url_for('route_email_alerts') }}" class="nav-link {% if active_page == 'email_alerts' %}active{% endif %}">
+                    <i class="fa-solid fa-envelope-open-text"></i> Email Alerts Hub
+                </a>
+                {% if current_user and current_user.role == 'admin' %}
+                <a href="{{ url_for('route_admin') }}" class="nav-link {% if active_page == 'admin' %}active{% endif %}" style="border-left-color: var(--accent-gold); background: rgba(245, 158, 11, 0.04);">
+                    <i class="fa-solid fa-user-shield" style="color: var(--accent-gold);"></i> Admin Panel
+                </a>
+                {% endif %}
+            </nav>
+
+            <!-- Watchlist Sidebar Box removed and moved to navbar -->
+            
+            <div class="sidebar-footer">
+                <div class="api-status">
+                    <span class="status-indicator success"></span>
+                    <span class="status-label">LLM Engine: <span class="engine-badge" id="engine-badge">...</span></span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-wrapper">
+            <header class="top-navbar glass-panel">
+                <!-- Search Box -->
+                <form action="{{ url_for('route_search') }}" method="POST" class="search-form">
+                    <div class="search-input-group">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" name="symbol" placeholder="Search Ticker (e.g. AAPL, TSLA, BTC)..." required autocomplete="off" value="{{ active_symbol }}">
+                        <button type="submit" class="search-btn">Search</button>
+                    </div>
+                </form>
+
+                <!-- Navigation Controls -->
+                <div class="top-nav-controls">
+                    <!-- Toggle active ticker in watchlist -->
+                    <button class="control-btn" id="add-watchlist-btn" title="Watch/Unwatch Current Asset">
+                        <i class="fa-regular fa-star"></i>
+                    </button>
+                    
+                    <!-- Watchlist Dropdown -->
+                    <div class="notification-dropdown-wrapper">
+                        <button class="control-btn" id="watchlist-dropdown-btn" title="View Watchlist">
+                            <i class="fa-solid fa-list-ul"></i>
+                            <span class="alert-count-badge" id="watchlist-count" style="background:var(--accent-gold); display:none;">0</span>
+                        </button>
+                        <div class="alerts-dropdown glass-panel" id="watchlist-dropdown-panel" style="width: 280px;">
+                            <h4>My Watchlist</h4>
+                            <div class="alerts-list" id="dropdown-watchlist-list">
+                                <p class="empty-alerts">No assets watched.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Alert Notification Icon -->
+                    <div class="notification-dropdown-wrapper">
+                        <button class="control-btn" id="alert-bell-btn" title="View Active Alerts">
+                            <i class="fa-solid fa-bell"></i>
+                            <span class="alert-count-badge" id="alert-count">0</span>
+                        </button>
+                        <div class="alerts-dropdown glass-panel" id="alerts-dropdown-panel">
+                            <h4>Active Alerts</h4>
+                            <div class="alerts-list" id="dropdown-alerts-list">
+                                <p class="empty-alerts">No alerts set.</p>
+                            </div>
+                            <button class="create-alert-btn" id="open-alert-modal-btn">Create Custom Alert</button>
+                        </div>
+                    </div>
+
+                    <button class="control-btn chat-toggle-btn" id="chat-sidebar-toggle" title="Toggle AI Assistant">
+                        <i class="fa-solid fa-comment-dots"></i>
+                        <span class="chat-ping-dot"></span>
+                    </button>
+
+                    <div style="height: 24px; width: 1px; background: var(--panel-border); margin: 0 10px;"></div>
+                    
+                    <!-- Live Local Clock -->
+                    <div class="header-clock" style="font-size: 13px; font-weight:600; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-right: 10px;">
+                        <i class="fa-regular fa-clock" style="color:var(--accent-blue);"></i> <span id="header-time">{{ current_time }}</span>
+                    </div>
+
+                    <div style="height: 24px; width: 1px; background: var(--panel-border); margin: 0 10px;"></div>
+
+                    <!-- User Actions Profile Menu -->
+                    <div style="display:flex; align-items:center; gap:12px; font-size: 13px;">
+                        <span style="color: var(--text-secondary);">Logged in as <strong>{{ current_user.username }}</strong></span>
+                        <a href="{{ url_for('route_logout') }}" style="color: var(--negative-color); text-decoration:none; font-weight:600; padding: 6px 12px; background: var(--negative-bg); border: 1px solid rgba(239, 68, 68, 0.2); border-radius:6px; transition:all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='var(--negative-bg)'">
+                            <i class="fa-solid fa-right-from-bracket"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Inner Page Content -->
+            <div class="content-container">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+
+        <!-- AI Assistant Sidebar Drawer -->
+        <aside class="chat-sidebar" id="chat-sidebar">
+            <div class="chat-header">
+                <div class="chat-header-title">
+                    <i class="fa-solid fa-robot chat-icon"></i>
+                    <div>
+                        <h2>Pulse Assistant</h2>
+                        <span class="chat-status">Analyzing {{ active_symbol }}</span>
+                    </div>
+                </div>
+                <button class="close-chat-btn" id="chat-sidebar-close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages-container">
+                <div class="message system-message">
+                    <div class="message-bubble">
+                        Hello! I am your AI Market Assistant. Ask me anything about <strong>{{ active_symbol }}</strong>, such as:
+                        <ul>
+                            <li>Is the price bullish or bearish?</li>
+                            <li>Summarize the latest risks.</li>
+                            <li>How is the sentiment looking?</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-wrapper">
+                <form id="chat-input-form" class="chat-form">
+                    <input type="text" id="chat-input-field" placeholder="Ask about {{ active_symbol }}..." autocomplete="off" required>
+                    <button type="submit" class="chat-submit-btn">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Create Alert Modal -->
+    <div class="modal-overlay" id="alert-modal">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h3>Set Custom Market Alert</h3>
+                <button class="close-modal-btn" id="close-alert-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="create-alert-form">
+                    <div class="form-group">
+                        <label for="alert-symbol">Asset Symbol</label>
+                        <input type="text" id="alert-symbol" value="{{ active_symbol }}" readonly class="form-control-readonly">
+                    </div>
+                    <div class="form-group">
+                        <label for="alert-type">Condition Type</label>
+                        <select id="alert-type" class="form-control">
+                            <option value="price_above">Price Rises Above ($)</option>
+                            <option value="price_below">Price Drops Below ($)</option>
+                            <option value="sentiment_below">News Sentiment Score Below</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="alert-threshold">Threshold Value</label>
+                        <input type="number" id="alert-threshold" step="0.01" class="form-control" required placeholder="e.g. 150.00 or -0.2">
+                    </div>
+                    <div class="form-group" style="display:flex; align-items:center; gap:8px; margin-top:12px; margin-bottom:8px;">
+                        <input type="checkbox" id="alert-email-notify" style="width:16px; height:16px; cursor:pointer;">
+                        <label for="alert-email-notify" style="margin-bottom:0; cursor:pointer; font-size:13px; color:var(--text-primary);">Receive notification via email</label>
+                    </div>
+                    <div id="email-input-group" class="form-group" style="display:none; margin-bottom:16px;">
+                        <label for="alert-email-address">Destination Email Address</label>
+                        <input type="email" id="alert-email-address" class="form-control" placeholder="e.g. name@example.com">
+                    </div>
+                    <button type="submit" class="submit-alert-btn">Create Alert</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Global State Variables -->
+    <script>
+        const ACTIVE_SYMBOL = "{{ active_symbol }}";
+        const ACTIVE_PAGE = "{{ active_page }}";
+        const USER_EMAIL = "{{ current_user.email if current_user else '' }}";
+    </script>
+    <!-- Script loaders -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html>

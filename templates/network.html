@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Network Graph Card -->
+    <div class="col-8 glass-panel">
+        <div class="panel-header">
+            <h2 class="panel-title"><i class="fa-solid fa-circle-nodes"></i> Market Correlation Network</h2>
+        </div>
+        <div class="panel-body">
+            <div class="chart-container" id="network-canvas" style="height: 450px;">
+                <!-- Loaded dynamically by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Network legend and descriptions -->
+    <div class="col-4 glass-panel">
+        <div class="panel-header">
+            <h2 class="panel-title"><i class="fa-solid fa-list-check"></i> Network Analysis</h2>
+        </div>
+        <div class="panel-body">
+            <div style="font-size:13.5px; line-height:1.6; color:var(--text-secondary);">
+                <p style="margin-bottom:16px;">
+                    This network map visualizes the linkages between <strong>{{ active_symbol }}</strong>, other related assets, and major macroeconomic drivers:
+                </p>
+                
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <span style="width:12px; height:12px; border-radius:50%; background:#3b82f6; display:inline-block;"></span>
+                    <span><strong>Active Asset</strong> (Primary Focus)</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <span style="width:12px; height:12px; border-radius:50%; background:#10b981; display:inline-block;"></span>
+                    <span><strong>Correlated Equities / Cryptos</strong></span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <span style="width:12px; height:12px; border-radius:50%; background:#f59e0b; display:inline-block;"></span>
+                    <span><strong>Macroeconomic Influences</strong> (e.g. Fed Policy, Inflation rates)</span>
+                </div>
+
+                <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--panel-border);">
+                    <h4 style="color:var(--text-primary); margin-bottom:8px;">Current Insights:</h4>
+                    <ul>
+                        <li style="margin-bottom:8px;">High positive correlation detected between {{ active_symbol }} and broad sector indices.</li>
+                        <li style="margin-bottom:8px;">Interest Rate updates (Fed Decisions) display the strongest negative weight connection in the current cluster.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

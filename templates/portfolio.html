@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Metrics cards for Portfolio -->
+<div class="metrics-row" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="metric-card glass-panel">
+        <span class="metric-card-label">Total Portfolio Valuation</span>
+        <span class="metric-card-value" id="portfolio-total-value">$0.00</span>
+        <div class="metric-card-footer">
+            <span class="text-muted">Real-time valuation based on current feeds</span>
+        </div>
+    </div>
+    <div class="metric-card glass-panel">
+        <span class="metric-card-label">Portfolio Risk Rating</span>
+        <span class="metric-card-value" id="portfolio-risk-profile">Analyzing...</span>
+        <div class="metric-card-footer">
+            <span class="text-muted">Beta and asset volatility analysis</span>
+        </div>
+    </div>
+</div>
+
+<div class="portfolio-grid">
+    <!-- Left: Portfolio Holdings Table and Add Form -->
+    <div style="display:flex; flex-direction:column; gap:24px;">
+        <!-- Holdings Table -->
+        <div class="glass-panel" style="flex-grow:1;">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-folder-open"></i> Portfolio Holdings</h2>
+            </div>
+            <div class="panel-body" style="padding:0;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Quantity</th>
+                            <th>Avg Cost</th>
+                            <th>Current Price</th>
+                            <th>Total Profit / Loss</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="portfolio-list-body">
+                        <!-- Loaded dynamically via JS -->
+                        <tr>
+                            <td colspan="6" class="empty-alerts">Loading holdings...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add Asset Form -->
+        <div class="glass-panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-plus"></i> Add Asset to Portfolio</h2>
+            </div>
+            <div class="panel-body">
+                <form id="add-holding-form" style="display:flex; gap:16px; align-items:flex-end;">
+                    <div class="form-group" style="flex:1; margin-bottom:0;">
+                        <label for="port-symbol">Ticker Symbol</label>
+                        <input type="text" id="port-symbol" placeholder="e.g. AAPL" class="form-control" required style="padding:8px 12px; font-size:13px;">
+                    </div>
+                    <div class="form-group" style="flex:1; margin-bottom:0;">
+                        <label for="port-qty">Quantity</label>
+                        <input type="number" id="port-qty" step="any" placeholder="e.g. 10" class="form-control" required style="padding:8px 12px; font-size:13px;">
+                    </div>
+                    <div class="form-group" style="flex:1; margin-bottom:0;">
+                        <label for="port-price">Purchase Price ($)</label>
+                        <input type="number" id="port-price" step="0.01" placeholder="e.g. 150.25" class="form-control" required style="padding:8px 12px; font-size:13px;">
+                    </div>
+                    <button type="submit" class="submit-alert-btn" style="width:auto; padding:10px 24px; font-size:13px;">
+                        Add Asset
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Allocation Pie Chart & AI Suggestions -->
+    <div style="display:flex; flex-direction:column; gap:24px;">
+        <!-- Pie Chart -->
+        <div class="glass-panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-chart-pie-simple"></i> Asset Weight Allocation</h2>
+            </div>
+            <div class="panel-body">
+                <div class="chart-container" id="portfolio-pie-canvas" style="height: 250px;">
+                    <!-- Loaded dynamically via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Rebalancing Suggestions -->
+        <div class="glass-panel ai-summary-block" style="background:rgba(16,185,129,0.04); border-color:rgba(16,185,129,0.15); margin-bottom:0;">
+            <h4 style="color:var(--positive-color);"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Rebalancing Insights</h4>
+            <ul>
+                <li><strong>Diversification Alert</strong>: Ensure your portfolio weights are balanced across stocks and cryptocurrencies to reduce systematic correlation risk.</li>
+                <li><strong>Volatile Exposure</strong>: Keep crypto weightings under 15% of your total net capital if you prefer stable long-term growth.</li>
+                <li><strong>Cash Reserves</strong>: Consider holding 5-10% liquidity in cash equivalents to capitalize on support boundary dips during periods of negative news sentiment.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

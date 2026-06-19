@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-grid" id="investors-dashboard" data-asset-class="{{ asset_class }}">
+    
+    <!-- Title Section -->
+    <div class="col-12" style="margin-bottom: -10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h1 style="margin:0; font-family:'Outfit',sans-serif; font-size:24px; font-weight:700;">
+                    <i class="fa-solid fa-users-gear" style="color:var(--accent-blue); margin-right:8px;"></i>
+                    {{ name }} ({{ active_symbol }}) - Investor Analysis
+                </h1>
+                <p style="margin:4px 0 0 0; font-size:13px; color:var(--text-secondary);">
+                    {% if asset_class == 'stock' %}
+                    Institutional ownership concentrations, ownership distribution, and official SEC regulatory filings.
+                    {% else %}
+                    Decentralization indices, network node allocation profiles, and smart contract protocol specifications.
+                    {% endif %}
+                </p>
+            </div>
+            <div>
+                <span class="badge {% if asset_class == 'stock' %}sentiment-pos{% else %}sentiment-neu{% endif %}" style="font-family:'Outfit',sans-serif; text-transform:uppercase; padding:6px 12px; font-weight:600;">
+                    {{ asset_class }} Asset
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. Left Panel: Holdings Distribution Chart -->
+    <div class="col-6 glass-panel">
+        <div class="panel-header">
+            <h2 class="panel-title">
+                <i class="fa-solid fa-chart-pie" style="color:var(--accent-blue);"></i> 
+                {% if asset_class == 'stock' %}Institutional Distribution{% else %}Network Token Allocation{% endif %}
+            </h2>
+        </div>
+        <div class="panel-body">
+            <div class="chart-container" id="holder-pie-canvas" style="height: 310px;">
+                <div class="spinner-wrapper" style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Right Panel: Ownership / Address Table -->
+    <div class="col-6 glass-panel">
+        <div class="panel-header">
+            <h2 class="panel-title">
+                {% if asset_class == 'stock' %}
+                <i class="fa-solid fa-building-columns" style="color:var(--accent-green);"></i> Top Institutional Holders
+                {% else %}
+                <i class="fa-solid fa-wallet" style="color:var(--accent-green);"></i> Address Allocation Index
+                {% endif %}
+            </h2>
+        </div>
+        <div class="panel-body" style="padding: 0; max-height:330px; overflow-y:auto;">
+            {% if asset_class == 'stock' %}
+            <table class="data-table" style="margin: 0; width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="padding-left:16px;">Holder</th>
+                        <th>Shares</th>
+                        <th>Est. Value</th>
+                        <th style="padding-right:16px; text-align:right;">% Out</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding-left:16px;"><strong>Vanguard Group Inc.</strong></td>
+                        <td>1,215,400,000</td>
+                        <td>$182.3B</td>
+                        <td style="padding-right:16px; text-align:right; color:var(--accent-blue);">7.6%</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-left:16px;"><strong>BlackRock Inc.</strong></td>
+                        <td>1,038,500,000</td>
+                        <td>$155.8B</td>
+                        <td style="padding-right:16px; text-align:right; color:var(--accent-blue);">6.5%</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-left:16px;"><strong>State Street Corp</strong></td>
+                        <td>608,200,000</td>
+                        <td>$91.2B</td>
+                        <td style="padding-right:16px; text-align:right; color:var(--accent-blue);">3.8%</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-left:16px;"><strong>Fidelity Management</strong></td>
+                        <td>463,900,000</td>
+                        <td>$69.5B</td>
+                        <td style="padding-right:16px; text-align:right; color:var(--accent-blue);">2.9%</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-left:16px;"><strong>Geode Capital Management</strong></td>
+                        <td>315,100,000</td>
+                        <td>$47.2B</td>
+                        <td style="padding-right:16px; text-align:right; color:var(--accent-blue);">1.9%</td>
+                    </tr>
+                </tbody>
+            </table>
+            {% else %}
+            <table class="data-table" style="margin: 0; width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="padding-left:16px;">Allocation Group</th>
+                        <th>Audited Size</th>
+                        <th>Est. Value</th>
+                        <th style="padding-right:16px; text-align:right;">% Supply</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding-left:16px;">
+                            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#3b82f6; margin-right:6px;"></span>
+                            <strong>Staking Rewards / Retail</strong>
+                        </td>
+                        <td>185k Wallets</td>
+                        <td>$42.0B</td>
+                        <td style="padding-right:16px; text-align:right; color:var(--accent-blue);">34.5%</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-left:16px;">
+                            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#60a5fa; margin-right:6px;"></span>
+                            <strong>Smart Contract Reserves</strong>
+                        </td>
+                        <td>3 Contracts</td>
+                        <td>$24.8B</td>
+                        <td style="padding-right:16px; text-align:right; color:var(--accent-blue);">20.0%</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-left:16px;">
+                            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#93c5fd; margin-right:6px;"></span>
+                            <strong>Exchange Reserves</strong>
+                        </td>
+                        <td>12 Exchanges</td>
+                        <td>$15.2B</td>
+                        <td style="padding-right:16px; text-align:right; color:var(--accent-blue);">18.0%</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-left:16px;">
+                            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#bfdbfe; margin-right:6px;"></span>
+                            <strong>Whales / Seed Investors</strong>
+                        </td>
+                        <td>14 Wallets</td>
+                        <td>$18.5B</td>
+                        <td style="padding-right:16px; text-align:right; color:var(--accent-blue);">15.0%</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-left:16px;">
+                            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#1e293b; margin-right:6px;"></span>
+                            <strong>Protocol Founders</strong>
+                        </td>
+                        <td>8 Addresses</td>
+                        <td>$12.4B</td>
+                        <td style="padding-right:16px; text-align:right; color:var(--accent-blue);">12.5%</td>
+                    </tr>
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 3. Bottom Panel: Documents and View Links -->
+    <div class="col-12 glass-panel">
+        <div class="panel-header">
+            <h2 class="panel-title">
+                {% if asset_class == 'stock' %}
+                <i class="fa-solid fa-file-signature" style="color:var(--accent-gold);"></i> SEC Filings & Financial Documents (EDGAR Stream)
+                {% else %}
+                <i class="fa-solid fa-file-shield" style="color:var(--accent-gold);"></i> Protocol Whitepapers & Smart Contract Audits
+                {% endif %}
+            </h2>
+        </div>
+        <div class="panel-body">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Document / Form Type</th>
+                        <th>Technical Description</th>
+                        <th>Reporting Date</th>
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if asset_class == 'stock' %}
+                    <tr>
+                        <td><strong style="color:var(--accent-blue);"><i class="fa-regular fa-file-pdf"></i> Form 10-K</strong></td>
+                        <td>Annual Financial Performance Report (Full Balance Sheet & MD&A)</td>
+                        <td>Feb 15, 2026</td>
+                        <td style="text-align:right;">
+                            <a href="/document/{{ active_symbol }}/10-K" target="_blank" class="badge sentiment-pos" style="text-decoration:none; display:inline-block;"><i class="fa-solid fa-eye"></i> View & Print</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color:var(--accent-blue);"><i class="fa-regular fa-file-pdf"></i> Form 10-Q</strong></td>
+                        <td>Quarterly Performance Update (Unaudited Earnings statements)</td>
+                        <td>May 15, 2026</td>
+                        <td style="text-align:right;">
+                            <a href="/document/{{ active_symbol }}/10-Q" target="_blank" class="badge sentiment-pos" style="text-decoration:none; display:inline-block;"><i class="fa-solid fa-eye"></i> View & Print</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color:var(--accent-blue);"><i class="fa-regular fa-file-pdf"></i> Form 8-K</strong></td>
+                        <td>Current Report (Material Events, Leadership Appointments, Partnerships)</td>
+                        <td>Jun 12, 2026</td>
+                        <td style="text-align:right;">
+                            <a href="/document/{{ active_symbol }}/8-K" target="_blank" class="badge sentiment-pos" style="text-decoration:none; display:inline-block;"><i class="fa-solid fa-eye"></i> View & Print</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td><strong style="color:var(--accent-blue);"><i class="fa-regular fa-file-lines"></i> Technical Whitepaper</strong></td>
+                        <td>Protocol Design Architecture, Consensus Framework, and Token Vesting curves</td>
+                        <td>Jun 19, 2026</td>
+                        <td style="text-align:right;">
+                            <a href="/document/{{ active_symbol }}/whitepaper" target="_blank" class="badge sentiment-pos" style="text-decoration:none; display:inline-block;"><i class="fa-solid fa-eye"></i> View & Print</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color:var(--accent-blue);"><i class="fa-regular fa-file-shield"></i> Security Audit Log</strong></td>
+                        <td>Third-party Smart Contract verification (Vulnerability Log & Mitigations)</td>
+                        <td>Jun 10, 2026</td>
+                        <td style="text-align:right;">
+                            <a href="/document/{{ active_symbol }}/security-audit" target="_blank" class="badge sentiment-pos" style="text-decoration:none; display:inline-block;"><i class="fa-solid fa-eye"></i> View & Print</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color:var(--accent-blue);"><i class="fa-regular fa-file-contract"></i> Compliance & Policy Brief</strong></td>
+                        <td>SEC commodity status briefing, decentralized governance index analysis</td>
+                        <td>May 28, 2026</td>
+                        <td style="text-align:right;">
+                            <a href="/document/{{ active_symbol }}/compliance-brief" target="_blank" class="badge sentiment-pos" style="text-decoration:none; display:inline-block;"><i class="fa-solid fa-eye"></i> View & Print</a>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

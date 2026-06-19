@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Gauge Sentiment Score -->
+    <div class="col-4 glass-panel">
+        <div class="panel-header">
+            <h2 class="panel-title"><i class="fa-solid fa-gauge-high"></i> Sentiment Speedometer</h2>
+        </div>
+        <div class="panel-body">
+            <div class="chart-container" id="sentiment-gauge" style="height: 300px;">
+                <!-- Loaded dynamically by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Sentiment Keywords Summary -->
+    <div class="col-8 glass-panel">
+        <div class="panel-header">
+            <h2 class="panel-title"><i class="fa-solid fa-tags"></i> Top Sentiment Driver Keywords</h2>
+        </div>
+        <div class="panel-body">
+            <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:20px;">
+                <span class="badge sentiment-pos" style="font-size:16px; padding:10px 18px;">Surge (+0.75)</span>
+                <span class="badge sentiment-pos" style="font-size:14px; padding:8px 14px;">Institutional (+0.60)</span>
+                <span class="badge sentiment-pos" style="font-size:13px; padding:6px 12px;">Partnership (+0.52)</span>
+                <span class="badge sentiment-neu" style="font-size:12px; padding:6px 10px;">Sideways (0.00)</span>
+                <span class="badge sentiment-neu" style="font-size:12px; padding:6px 10px;">Regulatory (0.02)</span>
+                <span class="badge sentiment-neg" style="font-size:13px; padding:6px 12px;">Headwinds (-0.45)</span>
+                <span class="badge sentiment-neg" style="font-size:15px; padding:8px 14px;">Inflation (-0.58)</span>
+            </div>
+            <div style="margin-top: 30px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">
+                <blockquote>
+                    <i class="fa-solid fa-quote-left" style="color:var(--accent-blue); margin-right:6px;"></i>
+                    Driver terms represent the highest frequency tokens found in news titles and descriptions, scaled by their corresponding NLP sentiment values. Positive terms contribute heavily to driving price support boundaries upward.
+                </blockquote>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historical Sentiment Timeline -->
+    <div class="col-12 glass-panel">
+        <div class="panel-header">
+            <h2 class="panel-title"><i class="fa-solid fa-timeline"></i> Sentiment vs Price Movement Correlation</h2>
+        </div>
+        <div class="panel-body">
+            <div class="chart-container" id="sentiment-trend-chart">
+                <!-- Loaded dynamically by JS -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

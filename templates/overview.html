@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Metrics Cards Row -->
+<div class="metrics-row">
+    <div class="metric-card glass-panel">
+        <span class="metric-card-label">Last Traded Price</span>
+        <span class="metric-card-value" id="metric-price">${{ price }}</span>
+        <div class="metric-card-footer">
+            <span class="{% if change >= 0 %}trend-up{% else %}trend-down{% endif %}" id="metric-change">
+                {% if change >= 0 %}+{% endif %}{{ change }}%
+            </span>
+            <span class="text-muted">Today</span>
+        </div>
+    </div>
+    <div class="metric-card glass-panel">
+        <span class="metric-card-label">Volume (24H)</span>
+        <span class="metric-card-value" id="metric-volume">
+            {% if volume %}{{ "{:,}".format(volume) }}{% else %}N/A{% endif %}
+        </span>
+        <div class="metric-card-footer">
+            <span class="text-muted">Shares traded</span>
+        </div>
+    </div>
+    <div class="metric-card glass-panel">
+        <span class="metric-card-label">Market Capitalization</span>
+        <span class="metric-card-value" id="metric-market-cap">
+            {% if market_cap %}${{ "{:,.0f}".format(market_cap) }}{% else %}N/A{% endif %}
+        </span>
+        <div class="metric-card-footer">
+            <span class="text-muted">Total Valuation</span>
+        </div>
+    </div>
+    <div class="metric-card glass-panel">
+        <span class="metric-card-label">Trailing P/E Ratio</span>
+        <span class="metric-card-value" id="metric-pe">
+            {% if pe_ratio %}{{ pe_ratio }}{% else %}N/A{% endif %}
+        </span>
+        <div class="metric-card-footer">
+            <span class="text-muted">Price / Earnings</span>
+        </div>
+    </div>
+</div>
+
+<!-- AI Trade Recommendation Card -->
+<div class="glass-panel trade-rec-card" id="trade-recommendation-panel" style="margin-bottom: 24px; padding: 20px; transition: all 0.3s ease;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--panel-border); padding-bottom:12px; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent-blue); font-size:18px;"></i>
+            <h3 style="font-family:'Outfit', sans-serif; font-size:16px; font-weight:700;">Pulse Trade Signal Engine</h3>
+        </div>
+        <span class="badge sentiment-neu" id="trade-signal-badge" style="font-size:12px; padding:4px 12px;">Analyzing...</span>
+    </div>
+    <div class="trade-rec-body" style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
+        <div>
+            <p id="trade-signal-desc" style="font-size:13.5px; line-height:1.6; color:var(--text-secondary);">
+                Evaluating historical price action, moving averages, and news sentiment drivers...
+            </p>
+        </div>
+        <div style="border-left:1px solid var(--panel-border); padding-left:20px; display:flex; flex-direction:column; gap:8px; justify-content:center;">
+            <div style="display:flex; justify-content:space-between; font-size:12px;">
+                <span style="color:var(--text-muted)">ENTRY RANGE:</span>
+                <strong id="trade-entry" style="color:var(--text-primary)">N/A</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:12px;">
+                <span style="color:var(--text-muted)">TARGET RANGE:</span>
+                <strong id="trade-target" style="color:var(--positive-color)">N/A</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:12px;">
+                <span style="color:var(--text-muted)">STOP LOSS:</span>
+                <strong id="trade-stop" style="color:var(--negative-color)">N/A</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="dashboard-grid">
+    <!-- Chart Section -->
+    <div class="col-8 glass-panel">
+        <div class="panel-header">
+            <h2 class="panel-title"><i class="fa-solid fa-chart-candlestick"></i> {{ active_symbol }} Price Performance</h2>
+            <div class="panel-controls" style="display:flex; gap:10px; align-items:center;">
+                <!-- Chart Type Selector -->
+                <select id="chart-type-selector" class="chart-selector-control">
+                    <option value="candlestick">Candlestick</option>
+                    <option value="line">Line Chart</option>
+                    <option value="area">Area Chart</option>
+                </select>
+                <!-- Chart Duration Selector -->
+                <select id="chart-duration-selector" class="chart-selector-control">
+                    <option value="1mo_1d">1 Month (Daily)</option>
+                    <option value="3mo_1d" selected>3 Months (Daily)</option>
+                    <option value="1y_1d">1 Year (Daily)</option>
+                    <option value="5d_1h">5 Days (Hourly)</option>
+                    <option value="1d_5m">1 Day (5 Min)</option>
+                    <option value="1d_1m">1 Day (1 Min)</option>
+                </select>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="chart-container" id="overview-chart-canvas">
+                <div class="spinner-wrapper">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Loading historical chart...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side Info: Profile & Actions -->
+    <div class="col-4 glass-panel">
+        <div class="panel-header">
+            <h2 class="panel-title"><i class="fa-solid fa-circle-info"></i> Asset Profile</h2>
+        </div>
+        <div class="panel-body" style="max-height: 400px; overflow-y: auto;">
+            <div class="profile-summary">
+                <!-- Asset Logo & Title Header -->
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                    {% if logo_url %}
+                    <div style="position:relative; width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
+                        <img src="{{ logo_url }}" alt="{{ active_symbol }} Logo" style="width:36px; height:36px; border-radius:50%; border:1px solid var(--panel-border); object-fit:contain; background:#ffffff; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div style="display:none; width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, var(--accent-blue) 0%, #1e293b 100%); color:white; align-items:center; justify-content:center; font-family:'Outfit',sans-serif; font-weight:700; font-size:14px; border:1px solid var(--panel-border);">
+                            {{ active_symbol[:2] }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    <h3 style="font-family: 'Outfit', sans-serif; font-size: 18px; margin:0;">{{ name }}</h3>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; border-bottom: 1px solid var(--panel-border); padding-bottom:6px;">
+                    <span style="color:var(--text-secondary)">52-Week High:</span>
+                    <strong>${{ high_52week }}</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:16px; font-size:13px; border-bottom: 1px solid var(--panel-border); padding-bottom:6px;">
+                    <span style="color:var(--text-secondary)">52-Week Low:</span>
+                    <strong>${{ low_52week }}</strong>
+                </div>
+
+                <!-- Societal Brief Bubble -->
+                {% if societal_brief %}
+                <div style="margin-bottom: 20px; padding: 12px; border-left: 3px solid var(--accent-blue); background: rgba(59, 130, 246, 0.04); border-radius: 0 8px 8px 0;">
+                    <h4 style="font-size:10px; color:var(--accent-blue); text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">Societal & Tech Impact</h4>
+                    <p style="font-size: 12.5px; line-height: 1.5; color: var(--text-primary); margin:0;">
+                        {{ societal_brief }}
+                    </p>
+                </div>
+                {% endif %}
+
+                <h4 style="font-size:10px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">Business Description</h4>
+                <p style="font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); margin:0;">
+                    {{ summary }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

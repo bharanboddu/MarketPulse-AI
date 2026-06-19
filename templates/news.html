@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- AI News Summarizer Bulletin -->
+    <div class="col-12 glass-panel ai-summary-block">
+        <h4><i class="fa-solid fa-wand-magic-sparkles"></i> AI Executive Briefing</h4>
+        <ul id="ai-summary-bullets">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <div class="spinner" style="width:16px; height:16px; border-width:2px;"></div>
+                <span style="font-size:12px; color:var(--text-muted)">Constructing executive briefing with LLM Engine...</span>
+            </div>
+        </ul>
+    </div>
+
+    <!-- Main News Feed -->
+    <div class="col-12 glass-panel">
+        <div class="panel-header">
+            <h2 class="panel-title"><i class="fa-solid fa-newspaper"></i> Aggregated Market News</h2>
+            <div class="panel-controls">
+                <span class="badge sentiment-pos" style="font-size: 10px;">Google News RSS Feed</span>
+            </div>
+        </div>
+        <div class="panel-body" id="news-feed-list">
+            <div class="spinner-wrapper">
+                <div class="spinner"></div>
+                <div class="loading-text">Fetching news feeds...</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

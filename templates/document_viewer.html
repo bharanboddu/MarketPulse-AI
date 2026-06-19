@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ doc_title }} | MarketPulse AI</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- MathJax for rendering equations -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #111827;
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-gold: #f59e0b;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* Toolbar styles */
+        .doc-toolbar {
+            background-color: rgba(17, 24, 39, 0.9);
+            border-bottom: 1px solid var(--panel-border);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+
+        .toolbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .toolbar-brand img {
+            height: 24px;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--panel-border);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-blue);
+            border: 1px solid var(--accent-blue);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        /* Document Container */
+        .doc-container {
+            max-width: 850px;
+            margin: 40px auto;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 60px 80px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Standard Stock/Filing view layout */
+        .doc-container.stock-doc {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #ffffff;
+            color: #111111;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border: 1px solid #d1d5db;
+        }
+
+        .stock-doc .doc-header {
+            border-bottom: 3px double #111111;
+            padding-bottom: 24px;
+            margin-bottom: 36px;
+            text-align: center;
+        }
+
+        .stock-doc .doc-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            font-size: 14px;
+            border-bottom: 1px solid #111111;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            font-family: 'Times New Roman', Times, serif;
+            color: #111111;
+        }
+
+        .stock-doc h1 {
+            font-size: 26px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        .stock-doc h2 {
+            font-size: 18px;
+            border-bottom: 1px solid #111111;
+            margin-top: 36px;
+            padding-bottom: 4px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .stock-doc p {
+            font-size: 15px;
+            text-align: justify;
+            text-indent: 30px;
+            margin-top: 0;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .stock-doc table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            font-size: 13px;
+        }
+
+        .stock-doc th {
+            border-top: 1px solid #111111;
+            border-bottom: 1px solid #111111;
+            padding: 6px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .stock-doc td {
+            border-bottom: 1px dotted #ccc;
+            padding: 6px;
+        }
+
+        .stock-doc td:nth-child(2),
+        .stock-doc td:nth-child(3),
+        .stock-doc td:nth-child(4) {
+            text-align: right;
+        }
+
+        /* Crypto Specific view layout */
+        .doc-container.crypto-doc {
+            background-color: #111827;
+            color: #f3f4f6;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .crypto-doc .doc-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 30px;
+            margin-bottom: 40px;
+        }
+
+        .crypto-doc h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .crypto-doc .doc-meta {
+            display: flex;
+            gap: 24px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .crypto-doc h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            color: #60a5fa;
+            margin-top: 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 8px;
+        }
+
+        .crypto-doc p {
+            font-size: 15px;
+            color: #d1d5db;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .crypto-doc table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .crypto-doc th {
+            background-color: rgba(255, 255, 255, 0.04);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #9ca3af;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .crypto-doc td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Print formatting */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            .doc-container {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            /* Convert crypto docs to print-friendly light styling in print */
+            .crypto-doc {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            .crypto-doc h1 {
+                background: none !important;
+                -webkit-text-fill-color: initial !important;
+                color: #000000 !important;
+                border-bottom: 2px solid #000000 !important;
+                padding-bottom: 10px;
+            }
+
+            .crypto-doc h2 {
+                color: #000000 !important;
+                border-bottom: 1px solid #000000 !important;
+            }
+
+            .crypto-doc p {
+                color: #111111 !important;
+            }
+
+            .crypto-doc table {
+                background: none !important;
+                border: 1px solid #000000 !important;
+                color: #000000 !important;
+            }
+
+            .crypto-doc th {
+                background-color: #f3f4f6 !important;
+                color: #000000 !important;
+                border-bottom: 2px solid #000000 !important;
+            }
+
+            .crypto-doc td {
+                border-bottom: 1px solid #e5e7eb !important;
+                color: #000000 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toolbar (Hidden on Print) -->
+    <div class="doc-toolbar no-print">
+        <a href="/investors" class="toolbar-brand">
+            <img src="/static/images/logo.png" alt="Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <span style="display:none; width:24px; height:24px; background:linear-gradient(135deg, var(--accent-blue) 0%, #1e293b 100%); color:white; align-items:center; justify-content:center; border-radius:50%; font-size:10px; font-weight:700;">MP</span>
+            <span>MarketPulse AI</span>
+        </a>
+        <div class="toolbar-actions">
+            <a href="/investors" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Return to Terminal</a>
+            <button onclick="window.print();" class="btn btn-primary"><i class="fa-solid fa-print"></i> Print Document</button>
+        </div>
+    </div>
+
+    <!-- Document Wrapper -->
+    <div class="doc-container {% if asset_class == 'stock' %}stock-doc{% else %}crypto-doc{% endif %}">
+        
+        <!-- Header -->
+        <div class="doc-header">
+            <h1>{{ doc_title }}</h1>
+            <div class="doc-meta">
+                {% if asset_class == 'stock' %}
+                <div><strong>UNITED STATES SEC EDGAR FEED</strong></div>
+                <div>Filing Date: Jun 19, 2026</div>
+                <div>Commission File Number: 001-38290</div>
+                <div>IRS Employer ID: 94-8201948</div>
+                {% else %}
+                <div><i class="fa-solid fa-hashtag"></i> Protocol: {{ symbol }}</div>
+                <div><i class="fa-solid fa-calendar-days"></i> Published: Jun 19, 2026</div>
+                <div><i class="fa-solid fa-shield-halved"></i> Verification: Active</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Document Sections -->
+        {% for section in sections %}
+            <h2>{{ section.title }}</h2>
+            
+            {% if section.is_table %}
+                <table>
+                    <thead>
+                        <tr>
+                            {% for header in section.table_headers %}
+                                <th>{{ header }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in section.table_rows %}
+                            <tr>
+                                {% for col in row %}
+                                    <td>{{ col }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>{{ section.content }}</p>
+            {% endif %}
+        {% endfor %}
+        
+        <!-- Document Footer for legitimacy -->
+        <div style="margin-top: 60px; border-top: 1px solid {% if asset_class == 'stock' %}#111111{% else %}rgba(255,255,255,0.08){% endif %}; padding-top: 20px; font-size: 11px; text-align: center; color: var(--text-secondary);">
+            {% if asset_class == 'stock' %}
+            CONFIDENTIAL - FOR INTERNAL TERMINAL USE ONLY. TARGETED VIA EDGAR API INTEGRATION.
+            {% else %}
+            SECURE LEDGER BRIEFING. SUBJECT TO DAO GOVERNANCE UPDATE CYCLES. ALL RIGHTS RETAINED BY THE PROTOCOL VALIDATOR UNION.
+            {% endif %}
+        </div>
+    </div>
+
+</body>
+</html>

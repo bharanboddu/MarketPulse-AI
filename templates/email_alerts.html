@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="email-alerts-container" style="display:flex; flex-direction:column; gap:24px; padding-bottom: 40px;">
+    <!-- Header Card -->
+    <div class="glass-panel" style="padding:24px; display:flex; justify-content:space-between; align-items:center; border-radius:12px; background:linear-gradient(135deg, rgba(30,41,59,0.5) 0%, rgba(15,23,42,0.8) 100%);">
+        <div>
+            <h2 style="font-family:'Outfit',sans-serif; font-size:24px; font-weight:700; color:var(--text-primary); margin-bottom:6px; display:flex; align-items:center; gap:10px;">
+                <i class="fa-solid fa-envelope-open-text" style="color:var(--accent-blue);"></i> Email Alerts Hub
+            </h2>
+            <p style="color:var(--text-secondary); font-size:13px;">Manage active email monitors and review the log history of triggered alerts sent to your inbox.</p>
+        </div>
+        <div style="display:flex; gap:16px;">
+            <div style="text-align:right;">
+                <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600; display:block;">Active Monitors</span>
+                <strong style="font-size:20px; color:var(--accent-blue);">{{ active_email_alerts|length }}</strong>
+            </div>
+            <div style="height:32px; width:1px; background:var(--panel-border); align-self:center;"></div>
+            <div style="text-align:right;">
+                <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600; display:block;">Total Dispatched</span>
+                <strong style="font-size:20px; color:#10b981;">{{ sent_email_alerts|length }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Email Monitors -->
+    <div class="glass-panel" style="padding:24px; border-radius:12px;">
+        <h3 style="font-family:'Outfit',sans-serif; font-size:18px; font-weight:600; color:var(--text-primary); margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-bell" style="color:var(--accent-blue);"></i> Active Email Monitors
+        </h3>
+        
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
+            {% for alert in active_email_alerts %}
+            <div class="glass-panel" style="padding:16px; border:1px solid rgba(59,130,246,0.2); border-radius:8px; display:flex; flex-direction:column; justify-content:space-between; gap:12px; background: rgba(59,130,246,0.02);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <strong style="font-size:18px; font-family:'Outfit',sans-serif; color:var(--text-primary);">{{ alert.symbol }}</strong>
+                        <span style="font-size:11px; color:var(--text-muted); display:block; margin-top:2px;">Created: {{ alert.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                    <span class="badge" style="font-size:10px; padding:3px 8px; background:rgba(59,130,246,0.1); color:var(--accent-blue); border:1px solid rgba(59,130,246,0.2);">
+                        <i class="fa-solid fa-hourglass-half"></i> Active
+                    </span>
+                </div>
+                
+                <div style="font-size:13px; color:var(--text-secondary); line-height:1.4;">
+                    <div style="margin-bottom:6px;">
+                        <span style="color:var(--text-muted);">Condition:</span> 
+                        <strong style="color:var(--text-primary);">
+                            {% if alert.alert_type == 'price_above' %}Price rises above ${{"{:,.2f}".format(alert.threshold)}}
+                            {% elif alert.alert_type == 'price_below' %}Price drops below ${{"{:,.2f}".format(alert.threshold)}}
+                            {% else %}Sentiment drops below {{alert.threshold}}
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <div>
+                        <i class="fa-regular fa-envelope" style="color:var(--text-muted); margin-right:4px;"></i> 
+                        <span style="color:var(--text-muted);">Destination:</span> 
+                        <strong style="color:var(--text-primary); font-family:monospace; font-size:11px;">{{ alert.target_email or 'user@marketpulse.ai' }}</strong>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; margin-top:4px;">
+                    <button class="trade-btn" style="background:var(--negative-bg); border:1px solid rgba(239,68,68,0.2); color:var(--negative-color); font-size:11px; padding:5px 12px; cursor:pointer;" onclick="deleteAlert({{ alert.id }}); setTimeout(() => location.reload(), 300);">
+                        <i class="fa-solid fa-trash-can"></i> Cancel Monitor
+                    </button>
+                </div>
+            </div>
+            {% else %}
+            <div style="grid-column: 1 / -1; padding:32px; text-align:center; color:var(--text-secondary);">
+                <i class="fa-regular fa-bell-slash" style="font-size:28px; color:var(--text-muted); margin-bottom:8px; display:block;"></i>
+                No active email monitors configured. Create target alerts from the dashboard or Today's Trades page.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Dispatched Alerts Log -->
+    <div class="glass-panel" style="padding:24px; border-radius:12px;">
+        <h3 style="font-family:'Outfit',sans-serif; font-size:18px; font-weight:600; color:var(--text-primary); margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-history" style="color:#10b981;"></i> Dispatched Email Alerts History
+        </h3>
+
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px; color:var(--text-secondary);">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--panel-border); color:var(--text-muted); font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">
+                        <th style="padding:12px 16px;">Asset Ticker</th>
+                        <th style="padding:12px 16px;">Trigger Condition</th>
+                        <th style="padding:12px 16px;">Recipient Email</th>
+                        <th style="padding:12px 16px;">Fired At (Timestamp)</th>
+                        <th style="padding:12px 16px; text-align:right;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alert in sent_email_alerts %}
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+                        <td style="padding:12px 16px; font-weight:700; color:var(--text-primary);">{{ alert.symbol }}</td>
+                        <td style="padding:12px 16px; color:var(--text-primary);">
+                            {% if alert.alert_type == 'price_above' %}Price rose above ${{"{:,.2f}".format(alert.threshold)}}
+                            {% elif alert.alert_type == 'price_below' %}Price dropped below ${{"{:,.2f}".format(alert.threshold)}}
+                            {% else %}Sentiment dropped below {{alert.threshold}}
+                            {% endif %}
+                        </td>
+                        <td style="padding:12px 16px; font-family:monospace; font-size:12px;">{{ alert.target_email or 'user@marketpulse.ai' }}</td>
+                        <td style="padding:12px 16px;">{{ alert.triggered_at.strftime('%Y-%m-%d %H:%M:%S') if alert.triggered_at else 'N/A' }}</td>
+                        <td style="padding:12px 16px; text-align:right;">
+                            <span class="badge" style="font-size:10px; padding:3px 8px; background:rgba(16,185,129,0.1); color:#10b981; border:1px solid rgba(16,185,129,0.2);">
+                                <i class="fa-solid fa-paper-plane"></i> Dispatched 📨
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="padding:32px; text-align:center; color:var(--text-muted);">
+                            <i class="fa-solid fa-inbox" style="font-size:24px; margin-bottom:8px; display:block; color:var(--text-muted);"></i>
+                            No email alerts have been sent yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
