@@ -438,9 +438,18 @@ function loadOverviewPage() {
         overviewListenersBound = true;
         const typeSel = document.getElementById("chart-type-selector");
         const durSel = document.getElementById("chart-duration-selector");
+        const refreshBtn = document.getElementById("chart-refresh-btn");
         
         if (typeSel) typeSel.addEventListener("change", loadOverviewPage);
         if (durSel) durSel.addEventListener("change", loadOverviewPage);
+        if (refreshBtn) refreshBtn.addEventListener("click", function() {
+            const icon = document.getElementById("chart-refresh-icon");
+            if (icon) {
+                icon.style.transform = "rotate(360deg)";
+                setTimeout(() => { icon.style.transform = "rotate(0deg)"; }, 600);
+            }
+            loadOverviewPage();
+        });
     }
     
     // Read selector values

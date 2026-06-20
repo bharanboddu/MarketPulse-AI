@@ -6,6 +6,7 @@ import services
 import numpy as np
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from services.email_service import send_alert_email
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -673,7 +674,19 @@ def api_market_data(symbol):
                              f"Price falls below ${alert.threshold}" if alert.alert_type == "price_below" else \
                              f"Sentiment falls below {alert.threshold}"
                 
-                action_log_desc = f"[EMAIL ALERT] Alert Triggered for {symbol}: {alert_desc} (Current: {metric_value}). Email sent to {user_email}."
+                # Actually send the email if email_notify is enabled
+                email_sent = False
+                if alert.email_notify and user_email and user_email != "user@marketpulse.ai":
+                    email_sent = send_alert_email(
+                        to_email=user_email,
+                        symbol=symbol,
+                        alert_type=alert.alert_type,
+                        threshold=alert.threshold,
+                        current_value=metric_value
+                    )
+                
+                email_status = "Email delivered" if email_sent else "Email not configured (check SMTP settings in .env)"
+                action_log_desc = f"[EMAIL ALERT] Alert Triggered for {symbol}: {alert_desc} (Current: {metric_value}). {email_status} to {user_email}."
                 print(f"\n{action_log_desc}\n")
                 
                 # Log action to ActivityLog

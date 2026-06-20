@@ -27,3 +27,10 @@ class Config:
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     NEWS_API_KEY = os.getenv("NEWS_API_KEY")
+
+    # SMTP Email Configuration (for sending alert emails)
+    SMTP_EMAIL = os.getenv("SMTP_EMAIL")          # e.g. yourname@gmail.com
+    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")      # Gmail App Password (NOT your login password)
+    SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+
