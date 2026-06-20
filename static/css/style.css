@@ -47,6 +47,7 @@ body {
     position: relative;
 }
 
+/* Animated dot grid background */
 body::before {
     content: "";
     position: fixed;
@@ -54,10 +55,60 @@ body::before {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-image: radial-gradient(rgba(59, 130, 246, 0.035) 1px, transparent 1px);
-    background-size: 24px 24px;
+    background-image: radial-gradient(rgba(59, 130, 246, 0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
+    animation: gridPulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes gridPulse {
+    0%   { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+
+/* Ambient floating orb - top right (blue) */
+body::after {
+    content: "";
+    position: fixed;
+    top: -10%;
+    right: -10%;
+    width: 45vw;
+    height: 45vw;
+    background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, rgba(59,130,246,0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    filter: blur(60px);
+    animation: floatOrb1 12s ease-in-out infinite alternate;
+}
+
+@keyframes floatOrb1 {
+    0%   { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(-40px, 60px) scale(1.15); }
+}
+
+/* Ambient floating orb - bottom left (purple) */
+.ambient-orb {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1;
+    filter: blur(60px);
+    border-radius: 50%;
+}
+
+.ambient-orb--purple {
+    bottom: -10%;
+    left: -10%;
+    width: 40vw;
+    height: 40vw;
+    background: radial-gradient(circle, rgba(139,92,246,0.1) 0%, rgba(139,92,246,0) 70%);
+    animation: floatOrb2 15s ease-in-out infinite alternate;
+}
+
+@keyframes floatOrb2 {
+    0%   { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(50px, -40px) scale(1.15); }
 }
 
 /* ==========================================================================
@@ -191,20 +242,33 @@ body::before {
     font-size: 14px;
     font-weight: 500;
     border-radius: 8px;
-    transition: all var(--transition-speed) ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 3px solid transparent;
+    position: relative;
 }
 
 .nav-link i {
     font-size: 16px;
     width: 20px;
     text-align: center;
+    transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.nav-link:hover i {
+    transform: scale(1.15);
+    color: var(--accent-blue);
 }
 
 .nav-link:hover, .nav-link.active {
     color: var(--text-primary);
-    background: rgba(59, 130, 246, 0.15);
-    box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.05);
+    background: rgba(59, 130, 246, 0.12);
+    box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.05), 0 2px 8px rgba(59, 130, 246, 0.06);
     border-left: 3px solid var(--accent-blue);
+}
+
+.nav-link.active i {
+    color: var(--accent-blue);
+    filter: drop-shadow(0 0 4px var(--accent-blue-glow));
 }
 
 /* Watchlist section */
@@ -520,9 +584,15 @@ body::before {
     background: var(--panel-bg);
     border: 1px solid var(--panel-border);
     box-shadow: 0 8px 32px 0 var(--panel-shadow);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-radius: 16px;
+    transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+}
+
+.glass-panel:hover {
+    border-color: rgba(59, 130, 246, 0.15);
+    box-shadow: 0 8px 32px 0 var(--panel-shadow), 0 0 20px rgba(59, 130, 246, 0.04);
 }
 
 .dashboard-grid {
@@ -570,6 +640,30 @@ body::before {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+    transition: left 0.6s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.3), 0 0 16px rgba(59,130,246,0.06);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.metric-card:hover::before {
+    left: 100%;
 }
 
 .metric-card-label {
@@ -1372,39 +1466,116 @@ select option, .chart-selector-control option, .form-control option {
     color: var(--positive-color) !important;
 }
 
-/* Enhanced Professional Fintech Glowing Blurs */
-body::after {
-    content: "";
-    position: fixed;
-    top: -10%;
-    right: -10%;
-    width: 45vw;
-    height: 45vw;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0) 70%);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 0;
-    filter: blur(80px);
+/* ==========================================================================
+   Premium UI Enhancements
+   ========================================================================== */
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
 
-.app-container::before {
-    content: "";
-    position: fixed;
-    bottom: -15%;
-    left: -15%;
-    width: 50vw;
-    height: 50vw;
-    background: radial-gradient(circle, rgba(245, 158, 11, 0.04) 0%, rgba(245, 158, 11, 0) 70%);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 0;
-    filter: blur(100px);
+::-webkit-scrollbar-track {
+    background: transparent;
 }
 
+::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.2);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.35);
+}
+
+/* Pulsing live status indicator */
+.status-indicator.success {
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+    0%, 100% { box-shadow: 0 0 6px var(--positive-color); }
+    50%      { box-shadow: 0 0 12px var(--positive-color), 0 0 20px rgba(16,185,129,0.3); }
+}
+
+/* Watchlist item interactive hover */
+.watchlist-item {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.watchlist-item:hover {
+    background: rgba(59, 130, 246, 0.08);
+    border-color: rgba(59, 130, 246, 0.2);
+    transform: translateX(4px);
+}
+
+/* Sidebar accent glow line */
+.sidebar {
+    position: relative;
+}
+
+.sidebar::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, rgba(59,130,246,0.3) 30%, rgba(139,92,246,0.2) 70%, transparent);
+    pointer-events: none;
+}
+
+/* Brand logo hover */
 .brand-logo-img {
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, filter 0.3s ease;
 }
 
 .brand-logo-img:hover {
-    transform: rotate(15deg) scale(1.05);
+    transform: rotate(15deg) scale(1.1);
+    filter: drop-shadow(0 0 8px var(--accent-blue-glow));
 }
+
+/* Search bar glow animation */
+.search-input-group:focus-within {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.15), 0 0 4px rgba(59, 130, 246, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Panel title icon glow on hover */
+.panel-title i {
+    transition: color 0.3s ease, filter 0.3s ease;
+}
+
+.glass-panel:hover .panel-title i {
+    color: var(--accent-blue);
+    filter: drop-shadow(0 0 4px var(--accent-blue-glow));
+}
+
+/* Badge hover lift */
+.badge {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.badge:hover {
+    transform: translateY(-1px);
+}
+
+/* Button press feedback */
+.trade-btn:active,
+.chart-selector-control:active,
+#chart-refresh-btn:active {
+    transform: scale(0.96);
+}
+
+/* Content fade-in on page load */
+.content-container {
+    animation: contentFadeIn 0.4s ease-out;
+}
+
+@keyframes contentFadeIn {
+    0%   { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
