@@ -957,6 +957,7 @@ def api_portfolio():
         symbol = data.get("symbol", "").strip().upper()
         qty = float(data.get("quantity", 0.0))
         price = float(data.get("purchase_price", 0.0))
+        trade_type = data.get("trade_type", "Long").strip()
         
         if symbol and qty > 0 and price > 0:
             # Clean and look up asset info
@@ -966,7 +967,7 @@ def api_portfolio():
             asset_class = info.get("asset_class", "stock")
             
             # Check if exists, update it, else create
-            holding = Portfolio.query.filter_by(symbol=symbol).first()
+            holding = Portfolio.query.filter_by(symbol=symbol, trade_type=trade_type).first()
             if holding:
                 # Recalculate average purchase price
                 total_qty = holding.quantity + qty
@@ -979,7 +980,8 @@ def api_portfolio():
                     name=name,
                     quantity=qty,
                     purchase_price=price,
-                    asset_class=asset_class
+                    asset_class=asset_class,
+                    trade_type=trade_type
                 )
                 db.session.add(holding)
             

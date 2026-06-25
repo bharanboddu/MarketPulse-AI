@@ -32,6 +32,7 @@
                     <thead>
                         <tr>
                             <th>Asset</th>
+                            <th>Type</th>
                             <th>Quantity</th>
                             <th>Avg Cost</th>
                             <th>Current Price</th>
@@ -42,7 +43,7 @@
                     <tbody id="portfolio-list-body">
                         <!-- Loaded dynamically via JS -->
                         <tr>
-                            <td colspan="6" class="empty-alerts">Loading holdings...</td>
+                            <td colspan="7" class="empty-alerts">Loading holdings...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -61,12 +62,19 @@
                         <input type="text" id="port-symbol" placeholder="e.g. AAPL" class="form-control" required style="padding:8px 12px; font-size:13px;">
                     </div>
                     <div class="form-group" style="flex:1; margin-bottom:0;">
+                        <label for="port-trade-type">Trade Type</label>
+                        <select id="port-trade-type" class="form-control" style="padding:8px 12px; font-size:13px;">
+                            <option value="Long">Long</option>
+                            <option value="Short">Short</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex:1; margin-bottom:0;">
                         <label for="port-qty">Quantity</label>
                         <input type="number" id="port-qty" step="any" placeholder="e.g. 10" class="form-control" required style="padding:8px 12px; font-size:13px;">
                     </div>
                     <div class="form-group" style="flex:1; margin-bottom:0;">
                         <label for="port-price">Purchase Price ($)</label>
-                        <input type="number" id="port-price" step="0.01" placeholder="e.g. 150.25" class="form-control" required style="padding:8px 12px; font-size:13px;">
+                        <input type="number" id="port-price" step="any" placeholder="e.g. 150.25" class="form-control" required style="padding:8px 12px; font-size:13px;">
                     </div>
                     <button type="submit" class="submit-alert-btn" style="width:auto; padding:10px 24px; font-size:13px;">
                         Add Asset

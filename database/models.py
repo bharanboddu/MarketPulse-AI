@@ -19,11 +19,12 @@ class Watchlist(db.Model):
 class Portfolio(db.Model):
     __tablename__ = "portfolio"
     id = db.Column(db.Integer, primary_key=True)
-    symbol = db.Column(db.String(20), unique=True, nullable=False)
+    symbol = db.Column(db.String(20), unique=False, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     quantity = db.Column(db.Float, nullable=False)
     purchase_price = db.Column(db.Float, nullable=False)
     asset_class = db.Column(db.String(20), nullable=False)  # 'stock' or 'crypto'
+    trade_type = db.Column(db.String(10), default="Long", nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -34,6 +35,7 @@ class Portfolio(db.Model):
             "quantity": self.quantity,
             "purchase_price": self.purchase_price,
             "asset_class": self.asset_class,
+            "trade_type": self.trade_type,
             "created_at": self.created_at.isoformat()
         }
 

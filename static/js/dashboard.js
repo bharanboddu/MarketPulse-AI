@@ -1017,7 +1017,7 @@ function loadPortfolioPage() {
             listBody.innerHTML = "";
             
             if (data.length === 0) {
-                listBody.innerHTML = `<tr><td colspan="5" class="empty-alerts">No assets in portfolio. Add one below.</td></tr>`;
+                listBody.innerHTML = `<tr><td colspan="6" class="empty-alerts">No assets in portfolio. Add one below.</td></tr>`;
                 chartCanvas.innerHTML = `<div class="empty-alerts">Add assets to view weighting.</div>`;
                 updatePortfolioMetrics([]);
                 return;
@@ -1042,8 +1042,17 @@ function loadPortfolioPage() {
                         const currentVal = item.quantity * priceData.price;
                         totalValue += currentVal;
                         
-                        const profit = (priceData.price - item.purchase_price) * item.quantity;
-                        const profitPct = ((priceData.price - item.purchase_price) / item.purchase_price) * 100;
+                        let profit = 0;
+                        let profitPct = 0;
+                        
+                        if (item.trade_type === "Short") {
+                            profit = (item.purchase_price - priceData.price) * item.quantity;
+                            profitPct = ((item.purchase_price - priceData.price) / item.purchase_price) * 100;
+                        } else {
+                            profit = (priceData.price - item.purchase_price) * item.quantity;
+                            profitPct = ((priceData.price - item.purchase_price) / item.purchase_price) * 100;
+                        }
+                        
                         const profitClass = profit >= 0 ? "text-success" : "text-danger";
                         const sign = profit >= 0 ? "+" : "";
                         
@@ -1053,9 +1062,13 @@ function loadPortfolioPage() {
                             currentVal: currentVal
                         });
                         
+                        const tradeBadgeClass = item.trade_type === "Short" ? "badge badge-danger" : "badge badge-success";
+                        const tradeBadge = `<span class="${tradeBadgeClass}" style="font-size: 10px;">${item.trade_type}</span>`;
+                        
                         const row = document.createElement("tr");
                         row.innerHTML = `
                             <td><strong>${item.symbol}</strong><br><span style="font-size:11px;color:var(--text-muted)">${item.name}</span></td>
+                            <td>${tradeBadge}</td>
                             <td>${item.quantity}</td>
                             <td>$${item.purchase_price.toFixed(2)}</td>
                             <td>$${priceData.price.toFixed(2)}</td>
@@ -1087,13 +1100,14 @@ function loadPortfolioPage() {
         form.onsubmit = function (e) {
             e.preventDefault();
             const symbol = document.getElementById("port-symbol").value.toUpperCase();
+            const tradeType = document.getElementById("port-trade-type") ? document.getElementById("port-trade-type").value : "Long";
             const qty = parseFloat(document.getElementById("port-qty").value);
             const price = parseFloat(document.getElementById("port-price").value);
             
             fetch("/api/portfolio", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ symbol: symbol, quantity: qty, purchase_price: price })
+                body: JSON.stringify({ symbol: symbol, trade_type: tradeType, quantity: qty, purchase_price: price })
             })
             .then(res => res.json())
             .then(() => {
