@@ -6,7 +6,8 @@ import numpy as np
 
 def fetch_rss_news(symbol: str) -> list:
     """Fetches real-time news headlines from Google News RSS for a given symbol."""
-    url = f"https://news.google.com/rss/search?q={symbol}+market&hl=en-US&gl=US&ceid=US:en"
+    search_term = symbol.replace("-USDT", "").replace("-USD", "")
+    url = f"https://news.google.com/rss/search?q={search_term}+crypto+market&hl=en-US&gl=US&ceid=US:en" if "-" in symbol else f"https://news.google.com/rss/search?q={search_term}+market&hl=en-US&gl=US&ceid=US:en"
     
     articles = []
     try:

@@ -10,16 +10,16 @@ HISTORY_CACHE = {}
 CACHE_EXPIRY = 15 # 15 seconds cache expiry for near real-time polling
 
 def get_clean_ticker(symbol: str) -> str:
-    """Standardizes asset symbols (e.g. BTC to BTC-USD, AAPL to AAPL)."""
+    """Standardizes asset symbols (e.g. BTC to BTC-USDT, AAPL to AAPL)."""
     symbol = symbol.strip().upper()
     crypto_mapping = {
-        "BTC": "BTC-USD",
-        "ETH": "ETH-USD",
-        "SOL": "SOL-USD",
-        "ADA": "ADA-USD",
-        "DOT": "DOT-USD",
-        "XRP": "XRP-USD",
-        "DOGE": "DOGE-USD"
+        "BTC": "BTC-USDT",
+        "ETH": "ETH-USDT",
+        "SOL": "SOL-USDT",
+        "ADA": "ADA-USDT",
+        "DOT": "DOT-USDT",
+        "XRP": "XRP-USDT",
+        "DOGE": "DOGE-USDT"
     }
     return crypto_mapping.get(symbol, symbol)
 
@@ -40,13 +40,13 @@ def get_asset_logo_url(symbol: str) -> str:
         "INTC": "https://logo.clearbit.com/intel.com",
         "PYPL": "https://logo.clearbit.com/paypal.com",
         "COIN": "https://logo.clearbit.com/coinbase.com",
-        "BTC-USD": "https://assets.coingecko.com/coins/images/1/small/bitcoin.png",
-        "ETH-USD": "https://assets.coingecko.com/coins/images/279/small/ethereum.png",
-        "SOL-USD": "https://assets.coingecko.com/coins/images/4128/small/solana.png",
-        "ADA-USD": "https://assets.coingecko.com/coins/images/975/small/cardano.png",
-        "DOT-USD": "https://assets.coingecko.com/coins/images/12171/small/polkadot.png",
-        "XRP-USD": "https://assets.coingecko.com/coins/images/44/small/ripple.png",
-        "DOGE-USD": "https://assets.coingecko.com/coins/images/325/small/dogecoin.png"
+        "BTC-USDT": "https://assets.coingecko.com/coins/images/1/small/bitcoin.png",
+        "ETH-USDT": "https://assets.coingecko.com/coins/images/279/small/ethereum.png",
+        "SOL-USDT": "https://assets.coingecko.com/coins/images/4128/small/solana.png",
+        "ADA-USDT": "https://assets.coingecko.com/coins/images/975/small/cardano.png",
+        "DOT-USDT": "https://assets.coingecko.com/coins/images/12171/small/polkadot.png",
+        "XRP-USDT": "https://assets.coingecko.com/coins/images/44/small/ripple.png",
+        "DOGE-USDT": "https://assets.coingecko.com/coins/images/325/small/dogecoin.png"
     }
     
     if symbol in mappings:
@@ -71,7 +71,8 @@ def get_asset_logo_url(symbol: str) -> str:
     return f"https://logo.clearbit.com/{clean_sym}.com"
 
 def fetch_asset_info_core(ticker_symbol: str) -> dict:
-    ticker = yf.Ticker(ticker_symbol)
+    yf_symbol = ticker_symbol.replace("-USDT", "-USD")
+    ticker = yf.Ticker(yf_symbol)
     info = ticker.info
     
     if not info or ("regularMarketPrice" not in info and "currentPrice" not in info and "navPrice" not in info):
@@ -116,10 +117,10 @@ def fetch_asset_info(symbol: str) -> dict:
         data = fetch_asset_info_core(ticker_symbol)
     except Exception as e:
         print(f"fetch_asset_info ERROR for {ticker_symbol}: {e}")
-        # If it failed and doesn't have a dash, try appending -USD (maybe it's an obscure crypto)
+        # If it failed and doesn't have a dash, try appending -USDT (maybe it's an obscure crypto)
         if "-" not in ticker_symbol:
             try:
-                crypto_ticker = f"{ticker_symbol}-USD"
+                crypto_ticker = f"{ticker_symbol}-USDT"
                 data = fetch_asset_info_core(crypto_ticker)
                 ticker_symbol = crypto_ticker
             except Exception as inner_e:
@@ -148,7 +149,8 @@ def fetch_historical_prices(symbol: str, period: str = "3mo", interval: str = "1
             return entry["data"]
             
     try:
-        ticker = yf.Ticker(ticker_symbol)
+        yf_symbol = ticker_symbol.replace("-USDT", "-USD")
+        ticker = yf.Ticker(yf_symbol)
         df = ticker.history(period=period, interval=interval)
         
         if df.empty:
