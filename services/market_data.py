@@ -7,7 +7,7 @@ import time
 # Global in-memory cache for profiles and history
 MARKET_DATA_CACHE = {}
 HISTORY_CACHE = {}
-CACHE_EXPIRY = 300 # 5 minutes cache expiry
+CACHE_EXPIRY = 15 # 15 seconds cache expiry for near real-time polling
 
 def get_clean_ticker(symbol: str) -> str:
     """Standardizes asset symbols (e.g. BTC to BTC-USD, AAPL to AAPL)."""
@@ -70,6 +70,37 @@ def get_asset_logo_url(symbol: str) -> str:
     clean_sym = symbol.lower()
     return f"https://logo.clearbit.com/{clean_sym}.com"
 
+def fetch_asset_info_core(ticker_symbol: str) -> dict:
+    ticker = yf.Ticker(ticker_symbol)
+    info = ticker.info
+    
+    if not info or ("regularMarketPrice" not in info and "currentPrice" not in info and "navPrice" not in info):
+        raise ValueError(f"No price data found for {ticker_symbol}")
+    
+    # Determine asset class
+    is_crypto = "-" in ticker_symbol or "USD" in ticker_symbol
+    asset_class = "crypto" if is_crypto else "stock"
+    
+    # Extract fields with safe defaults
+    name = info.get("longName") or info.get("shortName") or ticker_symbol
+    market_cap = info.get("marketCap") or (info.get("volume", 1) * info.get("regularMarketPrice", 1) if is_crypto else None)
+    pe_ratio = info.get("trailingPE") or None
+    
+    return {
+        "symbol": ticker_symbol,
+        "name": name,
+        "price": info.get("regularMarketPrice") or info.get("currentPrice") or info.get("navPrice") or 0.0,
+        "change": info.get("regularMarketChangePercent") or 0.0,
+        "volume": info.get("regularMarketVolume") or info.get("volume24Hr") or info.get("volume") or 0,
+        "market_cap": market_cap or 0,
+        "pe_ratio": pe_ratio,
+        "high_52week": info.get("fiftyTwoWeekHigh") or 0.0,
+        "low_52week": info.get("fiftyTwoWeekLow") or 0.0,
+        "summary": info.get("longBusinessSummary") or f"No summary available for {name}.",
+        "asset_class": asset_class,
+        "status": "success"
+    }
+
 def fetch_asset_info(symbol: str) -> dict:
     """Fetches key profile statistics and metadata from Yahoo Finance (cached)."""
     ticker_symbol = get_clean_ticker(symbol)
@@ -82,34 +113,19 @@ def fetch_asset_info(symbol: str) -> dict:
             return entry["data"]
             
     try:
-        ticker = yf.Ticker(ticker_symbol)
-        info = ticker.info
-        
-        # Determine asset class
-        is_crypto = "-" in ticker_symbol or "USD" in ticker_symbol
-        asset_class = "crypto" if is_crypto else "stock"
-        
-        # Extract fields with safe defaults
-        name = info.get("longName") or info.get("shortName") or ticker_symbol
-        market_cap = info.get("marketCap") or info.get("volume", 1) * info.get("regularMarketPrice", 1) if is_crypto else info.get("marketCap")
-        pe_ratio = info.get("trailingPE") or None
-        
-        data = {
-            "symbol": ticker_symbol,
-            "name": name,
-            "price": info.get("regularMarketPrice") or info.get("currentPrice") or info.get("navPrice") or 0.0,
-            "change": info.get("regularMarketChangePercent") or 0.0,
-            "volume": info.get("regularMarketVolume") or info.get("volume24Hr") or info.get("volume") or 0,
-            "market_cap": market_cap or 0,
-            "pe_ratio": pe_ratio,
-            "high_52week": info.get("fiftyTwoWeekHigh") or 0.0,
-            "low_52week": info.get("fiftyTwoWeekLow") or 0.0,
-            "summary": info.get("longBusinessSummary") or f"No summary available for {name}.",
-            "asset_class": asset_class,
-            "status": "success"
-        }
+        data = fetch_asset_info_core(ticker_symbol)
     except Exception as e:
-        data = get_simulated_asset_info(ticker_symbol)
+        print(f"fetch_asset_info ERROR for {ticker_symbol}: {e}")
+        # If it failed and doesn't have a dash, try appending -USD (maybe it's an obscure crypto)
+        if "-" not in ticker_symbol:
+            try:
+                crypto_ticker = f"{ticker_symbol}-USD"
+                data = fetch_asset_info_core(crypto_ticker)
+                ticker_symbol = crypto_ticker
+            except Exception as inner_e:
+                data = get_simulated_asset_info(ticker_symbol)
+        else:
+            data = get_simulated_asset_info(ticker_symbol)
         
     # Append logo_url and societal_brief for all results (both real and simulated!)
     from .ai_service import get_societal_brief

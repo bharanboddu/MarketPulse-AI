@@ -16,6 +16,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (watchlistStarBtn) {
         watchlistStarBtn.addEventListener("click", toggleWatchlist);
     }
+    
+    // Global real-time polling every 15 seconds
+    setInterval(function() {
+        console.log("Polling real-time market data...");
+        initSidebarAsset();
+        loadActivePageModule();
+    }, 15000);
 });
 
 // ==========================================================================

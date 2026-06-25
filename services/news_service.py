@@ -47,6 +47,7 @@ def fetch_rss_news(symbol: str) -> list:
             })
             
     except Exception as e:
+        print(f"fetch_rss_news ERROR for {symbol}: {e}")
         # Fallback to simulated news if network fails
         return get_simulated_news(symbol)
         
