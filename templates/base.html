@@ -83,6 +83,9 @@
                     <i class="fa-solid fa-user-shield" style="color: var(--accent-gold);"></i> Admin Panel
                 </a>
                 {% endif %}
+                <a href="{{ url_for('route_settings') }}" class="nav-link {% if active_page == 'settings' %}active{% endif %}">
+                    <i class="fa-solid fa-cog"></i> Settings
+                </a>
             </nav>
 
             <!-- Watchlist Sidebar Box removed and moved to navbar -->

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header-section">
+    <h1>Account Settings</h1>
+    <p class="text-secondary">Manage your profile, security, and preferences.</p>
+</div>
+
+<div class="settings-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+
+    <!-- Profile Settings -->
+    <div class="glass-panel">
+        <div class="panel-header">
+            <h2 class="panel-title"><i class="fa-solid fa-user"></i> Profile Settings</h2>
+        </div>
+        <div class="panel-body">
+            <form action="{{ url_for('api_settings_profile') }}" method="POST">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" class="form-control" value="{{ current_user.username }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" class="form-control" value="{{ current_user.email }}" required>
+                </div>
+                <button type="submit" class="submit-alert-btn">Update Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Security Settings -->
+    <div class="glass-panel">
+        <div class="panel-header">
+            <h2 class="panel-title"><i class="fa-solid fa-shield-halved"></i> Security</h2>
+        </div>
+        <div class="panel-body">
+            <form action="{{ url_for('api_settings_password') }}" method="POST">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" name="current_password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" name="new_password" class="form-control" required>
+                </div>
+                <button type="submit" class="submit-alert-btn">Change Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="glass-panel" style="border-color: rgba(239, 68, 68, 0.3);">
+        <div class="panel-header">
+            <h2 class="panel-title" style="color: var(--negative-color);"><i class="fa-solid fa-triangle-exclamation"></i> Account Session</h2>
+        </div>
+        <div class="panel-body">
+            <p class="text-muted" style="margin-bottom: 16px;">Sign out of your current MarketPulse AI session.</p>
+            <a href="{{ url_for('route_logout') }}" class="submit-alert-btn" style="background: var(--negative-bg); border-color: var(--negative-color); color: var(--negative-color); text-align: center; text-decoration: none; display: inline-block; padding: 12px 24px;">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout Now
+            </a>
+        </div>
+    </div>
+
+</div>
+
+{% if request.args.get('msg') %}
+<div class="glass-panel" style="margin-top: 24px; padding: 12px 20px; background: var(--positive-bg); color: var(--positive-color); border: 1px solid var(--positive-color);">
+    {{ request.args.get('msg') }}
+</div>
+{% endif %}
+
+{% if request.args.get('error') %}
+<div class="glass-panel" style="margin-top: 24px; padding: 12px 20px; background: var(--negative-bg); color: var(--negative-color); border: 1px solid var(--negative-color);">
+    {{ request.args.get('error') }}
+</div>
+{% endif %}
+
+{% endblock %}

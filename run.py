@@ -56,13 +56,14 @@ with app.app_context():
         db.session.add(Alert(symbol="BTC-USD", alert_type="price_below", condition="price < 55000", threshold=55000.0))
         db.session.commit()
 
-    if not User.query.first():
-        db.session.add(User(
-            username="admin",
-            email="admin@marketpulse.ai",
-            password_hash=generate_password_hash("AdminPassword123"),
+    if not User.query.filter_by(role="admin").first():
+        admin_user = User(
+            username="bharan262001@gmail.com",
+            email="bharan262001@gmail.com",
+            password_hash=generate_password_hash("123@Bharan"),
             role="admin"
-        ))
+        )
+        db.session.add(admin_user)
         db.session.add(User(
             username="user",
             email="user@marketpulse.ai",
@@ -166,6 +167,67 @@ def route_logout():
     log_user_activity("Logged Out")
     session.clear()
     return redirect(url_for("route_login"))
+
+@app.route("/settings")
+def route_settings():
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("route_login"))
+    return render_template("settings.html", active_page="settings")
+
+@app.route("/api/settings/profile", methods=["POST"])
+def api_settings_profile():
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("route_login"))
+        
+    user = User.query.get(user_id)
+    username = request.form.get("username")
+    email = request.form.get("email")
+    
+    if User.query.filter(User.username == username, User.id != user.id).first():
+        return redirect(url_for("route_settings", error="Username already taken."))
+    if User.query.filter(User.email == email, User.id != user.id).first():
+        return redirect(url_for("route_settings", error="Email already taken."))
+        
+    user.username = username
+    user.email = email
+    db.session.commit()
+    log_user_activity("Updated Profile")
+    session["user_username"] = username
+    return redirect(url_for("route_settings", msg="Profile updated successfully."))
+
+@app.route("/api/settings/password", methods=["POST"])
+def api_settings_password():
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("route_login"))
+        
+    user = User.query.get(user_id)
+    current_password = request.form.get("current_password")
+    new_password = request.form.get("new_password")
+    
+    if not check_password_hash(user.password_hash, current_password):
+        return redirect(url_for("route_settings", error="Incorrect current password."))
+        
+    user.password_hash = generate_password_hash(new_password)
+    db.session.commit()
+    log_user_activity("Changed Password")
+    return redirect(url_for("route_settings", msg="Password updated successfully."))
+
+@app.route("/api/settings/theme", methods=["POST"])
+def api_settings_theme():
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("route_login"))
+        
+    user = User.query.get(user_id)
+    theme = request.form.get("theme")
+    if theme in ["light", "dark"]:
+        user.theme = theme
+        db.session.commit()
+        log_user_activity(f"Changed Theme to {theme}")
+    return redirect(url_for("route_settings", msg="Theme updated."))
 
 @app.route("/admin")
 def route_admin():

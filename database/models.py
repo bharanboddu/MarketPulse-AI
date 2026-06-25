@@ -73,6 +73,7 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), default="user")  # 'user' or 'admin'
+    theme = db.Column(db.String(20), default="dark")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -81,6 +82,7 @@ class User(db.Model):
             "username": self.username,
             "email": self.email,
             "role": self.role,
+            "theme": self.theme,
             "created_at": self.created_at.isoformat()
         }
 

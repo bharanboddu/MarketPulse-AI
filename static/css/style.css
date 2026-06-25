@@ -31,6 +31,23 @@
     --transition-speed: 0.3s;
 }
 
+body.light-mode {
+    --bg-gradient-start: #f1f5f9;
+    --bg-gradient-end: #e2e8f0;
+    
+    --panel-bg: rgba(255, 255, 255, 0.7);
+    --panel-border: rgba(0, 0, 0, 0.05);
+    --panel-shadow: rgba(0, 0, 0, 0.05);
+    
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    
+    --positive-bg: rgba(16, 185, 129, 0.15);
+    --negative-bg: rgba(239, 68, 68, 0.15);
+    --neutral-bg: rgba(100, 116, 139, 0.15);
+}
+
 * {
     margin: 0;
     padding: 0;
